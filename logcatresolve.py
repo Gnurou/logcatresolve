@@ -17,7 +17,9 @@ import sys, re, subprocess, os, os.path
 
 re = re.compile("#\\d+ +(pc +)([\\da-f]+) +([\/\\\.\\w]+)")
 needed_env = ["ANDROID_PRODUCT_OUT", "ANDROID_EABI_TOOLCHAIN", "ANDROID_BUILD_TOP"]
+addr2line_bin = ["arm-eabi-addr2line", "arm-linux-androideabi-addr2line"]
 env = {}
+addr2line_cmd = None
 
 def addr2line(addr, shllib):
 	return subprocess.check_output([addr2line_cmd, "-C", "-f", "-e", shllib, addr]).splitlines()
@@ -30,8 +32,16 @@ if __name__ == "__main__":
 			sys.exit(0)
 	top = env["ANDROID_BUILD_TOP"]
 	base = os.path.join(env["ANDROID_PRODUCT_OUT"], "symbols")
-	global addr2line_cmd
-	addr2line_cmd = os.path.join(env["ANDROID_EABI_TOOLCHAIN"], "arm-eabi-addr2line")
+	for bin in addr2line_bin:
+		tmp = os.path.join(env["ANDROID_EABI_TOOLCHAIN"], "arm-linux-androideabi-addr2line")
+		if os.path.isfile(tmp):
+			addr2line_bin = tmp
+			break
+
+	if not addr2line_bin:
+		print("Cannot find addr2line binary!")
+		sys.exit(1)
+
 	for line in sys.stdin:
 		m = re.search(line)
 		if m:
