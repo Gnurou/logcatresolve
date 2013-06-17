@@ -28,8 +28,8 @@ if __name__ == "__main__":
 	for v in needed_env:
 		env[v] = os.getenv(v)
 		if not env[v]:
-			print "Missing environment variable %s. Please configure Android for building."
-			sys.exit(0)
+			print("Missing environment variable %s. Please configure Android for building." % (v,))
+			sys.exit(1)
 	top = env["ANDROID_BUILD_TOP"]
 	base = os.path.join(env["ANDROID_PRODUCT_OUT"], "symbols")
 	for bin in addr2line_bin:
